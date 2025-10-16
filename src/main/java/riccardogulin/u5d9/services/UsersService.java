@@ -18,12 +18,16 @@ import riccardogulin.u5d9.payload.NewUserPayload;
 import riccardogulin.u5d9.repositories.UsersRepository;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 @Service
 @Slf4j
 public class UsersService {
+	private static final long MAX_SIZE = 5 * 1024 * 1024; // 5 MB
+	private static final List<String> ALLOWED_TYPES = List.of("image/png", "image/jpeg");
+	
 	@Autowired
 	private UsersRepository usersRepository;
 	@Autowired
@@ -96,6 +100,11 @@ public class UsersService {
 	}
 
 	public String uploadAvatar(MultipartFile file) {
+
+		if (file.isEmpty()) throw new BadRequestException("File vuoto!");
+		if (file.getSize() > MAX_SIZE) throw new BadRequestException("File troppo grande!");
+		if (!ALLOWED_TYPES.contains(file.getContentType())) throw new BadRequestException("I formati permessi sono png e jpeg!");
+
 		// Controllo che l'utente esista...
 		try {
 			Map result = imageUploader.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
