@@ -7,7 +7,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import riccardogulin.u5d9.entities.User;
-import riccardogulin.u5d9.exceptions.BadRequestException;
+import riccardogulin.u5d9.exceptions.ValidationException;
 import riccardogulin.u5d9.payload.NewUserDTO;
 import riccardogulin.u5d9.payload.NewUserPayload;
 import riccardogulin.u5d9.services.UsersService;
@@ -47,8 +47,9 @@ public class UsersController {
 		// @Validated serve per "attivare" la validazione
 		// BindingResult è un oggetto che contiene tutti gli errori e anche dei metodi comodi da usare tipo .hasErrors()
 		if (validationResult.hasErrors()) {
-			validationResult.getFieldErrors().forEach(fieldError -> System.out.println(fieldError.getDefaultMessage()));
-			throw new BadRequestException("Ci sono stati errori di validazione");
+
+			throw new ValidationException(validationResult.getFieldErrors()
+					.stream().map(fieldError -> fieldError.getDefaultMessage()).toList());
 		}
 		return this.usersService.save(payload);
 	}

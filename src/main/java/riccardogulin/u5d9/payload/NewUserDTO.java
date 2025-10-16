@@ -16,7 +16,7 @@ public record NewUserDTO(
 		@Email(message = "L'indirizzo email inserito non è nel formato corretto!")
 		String email,
 		@NotBlank(message = "La password è obbligatoria!")
-		@Size(min = 4)
+		@Size(min = 4, message = "La password deve avere minimo 4 caratteri")
 		@Pattern(regexp = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{4,}$", message = "La password deve contenere una maiuscola, una minuscola ecc ecc ...")
 		String password) {
 }
