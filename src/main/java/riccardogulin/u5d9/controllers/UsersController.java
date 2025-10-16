@@ -6,12 +6,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import riccardogulin.u5d9.entities.User;
 import riccardogulin.u5d9.exceptions.ValidationException;
 import riccardogulin.u5d9.payload.NewUserDTO;
 import riccardogulin.u5d9.payload.NewUserPayload;
 import riccardogulin.u5d9.services.UsersService;
 
+import java.io.IOException;
 import java.util.UUID;
 
 /*
@@ -72,5 +74,15 @@ public class UsersController {
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void findByIdAndDelete(@PathVariable UUID userId) {
 		this.usersService.findByIdAndDelete(userId);
+	}
+
+	@PatchMapping("/{userId}/avatar")
+	public String uploadImage(@RequestParam("avatar") MultipartFile file) throws IOException {
+		// "avatar" deve corrispondere ESATTAMENTE al nome del campo del MultiPart che contiene il file
+		// che è quello che verrà inserito dal frontend
+		// Se non corrisponde non troverò il file
+		System.out.println(file.getSize());
+		System.out.println(file.getOriginalFilename());
+		return this.usersService.uploadAvatar(file);
 	}
 }

@@ -1,5 +1,7 @@
 package riccardogulin.u5d9.services;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -7,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import riccardogulin.u5d9.entities.User;
 import riccardogulin.u5d9.exceptions.BadRequestException;
 import riccardogulin.u5d9.exceptions.NotFoundException;
@@ -14,6 +17,8 @@ import riccardogulin.u5d9.payload.NewUserDTO;
 import riccardogulin.u5d9.payload.NewUserPayload;
 import riccardogulin.u5d9.repositories.UsersRepository;
 
+import java.io.IOException;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -21,6 +26,8 @@ import java.util.UUID;
 public class UsersService {
 	@Autowired
 	private UsersRepository usersRepository;
+	@Autowired
+	private Cloudinary imageUploader;
 
 	public Page<User> findAll(int pageNumber, int pageSize, String sortBy) {
 		if (pageSize > 50) pageSize = 50;
@@ -86,5 +93,18 @@ public class UsersService {
 	public void findByIdAndDelete(UUID userId) {
 		User found = this.findById(userId);
 		this.usersRepository.delete(found);
+	}
+
+	public String uploadAvatar(MultipartFile file) {
+		// Controllo che l'utente esista...
+		try {
+			Map result = imageUploader.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+			String imageURL = (String) result.get("url");
+
+			// ... qua va salvato l'url dentro il record dello user di riferimento
+			return imageURL;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }
